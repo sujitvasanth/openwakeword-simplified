@@ -9,10 +9,10 @@ class AudioFeatures():
         sessionOptions = ort.SessionOptions()
         sessionOptions.inter_op_num_threads = ncpu
         sessionOptions.intra_op_num_threads = ncpu
-        self.melspec_model = ort.InferenceSession(melspec_model_path, sess_options=sessionOptions, providers=["CUDAExecutionProvider"])
+        self.melspec_model = ort.InferenceSession(melspec_model_path, sess_options=sessionOptions, providers=["CUDAExecutionProvider"] if device == "gpu" else ["CPUExecutionProvider"])
         self.onnx_execution_provider = self.melspec_model.get_providers()[0]
         self.melspec_model_predict = lambda x: self.melspec_model.run(None, {'input': x})
-        self.embedding_model = ort.InferenceSession(embedding_model_path, sess_options=sessionOptions, providers=["CUDAExecutionProvider"])
+        self.embedding_model = ort.InferenceSession(embedding_model_path, sess_options=sessionOptions, providers=["CUDAExecutionProvider"] if device == "gpu" else ["CPUExecutionProvider"])
         self.embedding_model_predict = lambda x: self.embedding_model.run(None, {'input_1': x})[0].squeeze()
         self.raw_data_buffer: Deque = deque(maxlen=sr*10)
         self.melspectrogram_buffer = np.ones((76, 32))  # n_frames x num_features
@@ -94,19 +94,19 @@ class AudioFeatures():
     def __call__(self, x): return self._streaming_features(x)
 
 class Model():
-    def __init__(self, wakeword_models: List[str] = [], inference_framework: str = "onnx", **kwargs):
+    def __init__(self, wakeword_models: List[str] = [], inference_framework: str = "onnx", device: str = 'gpu', **kwargs):
         self.model_path = wakeword_models[0]  # Use the first model provided
         self.model_name = os.path.splitext(os.path.basename(self.model_path))[0]
         import onnxruntime as ort
         sessionOptions = ort.SessionOptions()
         sessionOptions.inter_op_num_threads = 1
         sessionOptions.intra_op_num_threads = 1
-        self.model = ort.InferenceSession(self.model_path, sess_options=sessionOptions, providers=["CPUExecutionProvider"])
+        self.model = ort.InferenceSession(self.model_path, sess_options=sessionOptions, providers=["CUDAExecutionProvider"] if device == "gpu" else ["CPUExecutionProvider"])
         self.model_input_shape = self.model.get_inputs()[0].shape[1]
         self.model_output_shape = self.model.get_outputs()[0].shape[1]
         self.model_prediction_function = functools.partial(self.model.run, None)
         self.prediction_buffer = deque(maxlen=30)
-        self.preprocessor = AudioFeatures(inference_framework=inference_framework, **kwargs)
+        self.preprocessor = AudioFeatures(inference_framework=inference_framework, device=device, **kwargs)
 
     def predict(self, x: np.ndarray, patience: dict = {}, threshold: dict = {}):
         n_prepared_samples = self.preprocessor(x) # Retrieve input name for the model
