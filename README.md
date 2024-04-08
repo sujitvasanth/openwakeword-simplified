@@ -1,5 +1,6 @@
 # openwakeword-simplified
 This is a simplified version of openwakeword https://github.com/dscripka/openWakeWord
+
 You should have example folder with 
 * model.py                        the library
 * melspectrogram.onnx             NN to calculate mel spectrogram
@@ -16,14 +17,10 @@ mic_stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=Tr
 while True:
     audio = np.frombuffer(mic_stream.read(3000), dtype=np.int16)
     prediction = model.predict(audio)
-    #print(prediction)
     if prediction["Eugene"] >0.11:
         print(" ============== Wakeword Detected ==============")
-        print(prediction["Eugene"])
-        print(model.predict(audio))
-        print(model.predict(audio))
-        print(model.predict(audio))
-</pre>
+        print(prediction["Eugene"]);print(model.predict(audio));
+        print(model.predict(audio));print(model.predict(audio))</pre>
 
 Requires onnxruntime with gpu support but will work on cpu (need to change device in model.py) 
 <pre lang=LANG>
