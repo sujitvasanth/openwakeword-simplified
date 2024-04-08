@@ -24,10 +24,10 @@ while True:
         print(model.predict(audio));print(model.predict(audio))</pre>
 
 Requires onnxruntime with gpu support but will work on cpu (need to change device in model.py) 
-<pre lang=LANG>
+
 pip install onnxruntime-gpu==1.17.0 --index-url=https://pkgs.dev.azure.com/onnxruntime/onnxruntime/_packaging/onnxruntime-cuda-12/pypi/simple
 pip install onnxruntime-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/
-</pre>
+
 
 
 
