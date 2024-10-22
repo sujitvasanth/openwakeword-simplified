@@ -1,5 +1,6 @@
 # openwakeword-simplified
 This is a simplified version of openwakeword https://github.com/dscripka/openWakeWord
+You can generate  your own onnx wakeword model using the notebook in this repo (taken from dscripta's github)
 
 You should have example folder with 
 * model.py                        the library
